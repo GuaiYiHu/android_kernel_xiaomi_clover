@@ -114,3 +114,8 @@ obj-$(CONFIG_QCOM_QDSS_BRIDGE) += qdss_bridge.o
 #WENDELL-20180226 added
 obj-$(CONFIG_SERIAL_NUM) += serial_num.o
 #END
+
+# TODO: remove me b/62058353
+subdir-ccflags-y += \
+	-Wno-ignored-attributes \
+	-Wno-gcc-compat

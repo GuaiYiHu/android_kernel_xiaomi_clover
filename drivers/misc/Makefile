@@ -70,7 +70,7 @@ obj-$(CONFIG_HQ_HARDWARE_INFO) += hqhardwareinfo/
 obj-$(CONFIG_BOOT_INTO_FACTORY_MODE) += hqfactoryboot/
 obj-$(CONFIG_MI_FS)             +=xiaomi_fs/
 
-# TODO: remove me b/62057517
+# TODO: remove me b/62058353
 subdir-ccflags-y += \
 	-Wno-ignored-attributes \
 	-Wno-header-guard
