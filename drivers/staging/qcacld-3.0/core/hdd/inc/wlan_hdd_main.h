@@ -2259,6 +2259,7 @@ struct hdd_context_s {
 
 	enum sar_version sar_version;
 
+	bool is_ssr_in_progress;
 };
 
 int hdd_validate_channel_and_bandwidth(hdd_adapter_t *adapter,
@@ -2402,6 +2403,19 @@ struct qdf_mac_addr *
 hdd_wlan_get_ibss_mac_addr_from_staid(hdd_adapter_t *pAdapter,
 				      uint8_t staIdx);
 void hdd_checkandupdate_phymode(hdd_context_t *pHddCtx);
+
+/**
+ * wlan_hdd_validate_mac_address() - Function to validate mac address
+ * @mac_addr: input mac address
+ *
+ * Return QDF_STATUS
+ */
+#define wlan_hdd_validate_mac_address(mac_addr) \
+	__wlan_hdd_validate_mac_address(mac_addr, __func__)
+
+QDF_STATUS __wlan_hdd_validate_mac_address(struct qdf_mac_addr *mac_addr,
+					   const char *func);
+
 #ifdef MSM_PLATFORM
 /**
  * hdd_bus_bw_compute_timer_start() - start the bandwidth timer
@@ -2700,6 +2714,28 @@ static inline int hdd_process_pktlog_command(hdd_context_t *hdd_ctx,
 }
 #endif /* REMOVE_PKT_LOG */
 
+#ifdef FEATURE_SG
+/**
+ * hdd_set_sg_flags() - enable SG flag in the network device
+ * @hdd_ctx: HDD context
+ * @wlan_dev: network device structure
+ *
+ * This function enables the SG feature flag in the
+ * given network device.
+ *
+ * Return: none
+ */
+static inline void hdd_set_sg_flags(hdd_context_t *hdd_ctx,
+	 struct net_device *wlan_dev)
+{
+	hdd_debug("SG Enabled");
+	wlan_dev->features |= NETIF_F_SG;
+}
+#else
+static inline void hdd_set_sg_flags(hdd_context_t *hdd_ctx,
+	 struct net_device *wlan_dev){}
+#endif
+
 #ifdef FEATURE_TSO
 /**
  * hdd_set_tso_flags() - enable TSO flags in the network device
@@ -2730,8 +2766,7 @@ static inline void hdd_set_tso_flags(hdd_context_t *hdd_ctx,
 static inline void hdd_set_tso_flags(hdd_context_t *hdd_ctx,
 	 struct net_device *wlan_dev)
 {
-	hdd_debug("SG Enabled");
-	wlan_dev->features |= NETIF_F_SG;
+	hdd_set_sg_flags(hdd_ctx, wlan_dev);
 }
 #endif /* FEATURE_TSO */
 
@@ -3129,15 +3164,6 @@ hdd_station_info_t *hdd_get_stainfo(hdd_station_info_t *aStaInfo,
 
 int hdd_driver_memdump_init(void);
 void hdd_driver_memdump_deinit(void);
-
-/**
- * hdd_is_cli_iface_up() - check if there is any cli iface up
- * @hdd_ctx: HDD context
- *
- * Return: return true if there is any cli iface(STA/P2P_CLI) is up
- *         else return false
- */
-bool hdd_is_cli_iface_up(hdd_context_t *hdd_ctx);
 
 /**
  * wlan_hdd_free_cache_channels() - Free the cache channels list
