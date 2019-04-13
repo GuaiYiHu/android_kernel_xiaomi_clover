@@ -251,6 +251,9 @@ static int find_free_channels(unsigned long *bitmap, unsigned int start,
 			;
 		if (i == width)
 			return pos;
+
+		/* step over [pos..pos+i) to continue search */
+		pos += i;
 	}
 
 	return -1;
@@ -526,7 +529,7 @@ static int stm_char_policy_set_ioctl(struct stm_file *stmf, void __user *arg)
 {
 	struct stm_device *stm = stmf->stm;
 	struct stp_policy_id *id;
-	int ret = -EINVAL;
+	int ret = -EINVAL, wlimit = 1;
 	u32 size;
 
 	if (stmf->output.nr_chans)
@@ -554,8 +557,10 @@ static int stm_char_policy_set_ioctl(struct stm_file *stmf, void __user *arg)
 	if (id->__reserved_0 || id->__reserved_1)
 		goto err_free;
 
-	if (id->width < 1 ||
-	    id->width > PAGE_SIZE / stm->data->sw_mmiosz)
+	if (stm->data->sw_mmiosz)
+		wlimit = PAGE_SIZE / stm->data->sw_mmiosz;
+
+	if (id->width < 1 || id->width > wlimit)
 		goto err_free;
 
 	ret = stm_file_assign(stmf, id->id, id->width);
@@ -859,9 +864,15 @@ static int __stm_source_link_drop(struct stm_source_device *src,
 {
 	struct stm_device *link;
 	int ret = 0;
+<<<<<<< HEAD
 
 	lockdep_assert_held(&stm->link_mutex);
 
+=======
+
+	lockdep_assert_held(&stm->link_mutex);
+
+>>>>>>> 07797f0ce78953f8527f708fbf79857d3f3ed479
 	/* for stm::link_list modification, we hold both mutex and spinlock */
 	spin_lock(&stm->link_lock);
 	spin_lock(&src->link_lock);
@@ -887,6 +898,7 @@ unlock:
 	spin_unlock(&src->link_lock);
 	spin_unlock(&stm->link_lock);
 
+<<<<<<< HEAD
 	/*
 	 * Call the unlink callbacks for both source and stm, when we know
 	 * that we have actually performed the unlinking.
@@ -899,6 +911,10 @@ unlock:
 			stm->data->unlink(stm->data, src->output.master,
 					  src->output.channel);
 	}
+=======
+	if (!ret && src->data->unlink)
+		src->data->unlink(src->data);
+>>>>>>> 07797f0ce78953f8527f708fbf79857d3f3ed479
 
 	return ret;
 }
